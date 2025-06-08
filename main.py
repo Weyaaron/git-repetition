@@ -12,18 +12,22 @@ class Task:
     def check_for_teardown(self):
         pass
 
+        # Todo: Do a temporary directory with setup!
 
 class SwitchBranchTask(Task):
     def __init__(self):
         self.target_branch_name = "Test"
+        self.waiting_delay = 5
 
     def setup(self):
         status = subprocess.run(
             ["git", "branch", "--show-current"], capture_output=True
         )
-        # CompletedProcess(args=['ls', '-l', '/dev/null'], returncode=0,
-        # stdout=b'crw-rw-rw- 1 root root 1, 3 Jan 23 16:23 /dev/null\n', stderr=b'')
-        pass
+
+    def display_command(self):
+        print(
+            f"Please switch to the branch '{self.target_branch_name}'. Create it if it does not exist."
+        )
 
     def teardown(self):
         pass
@@ -32,18 +36,20 @@ class SwitchBranchTask(Task):
         status = subprocess.run(
             ["git", "branch", "--show-current"], capture_output=True, encoding="utf-8"
         )
-        print(status.stdout)
-        return status.stdout == self.target_branch_name
+        status_output = status.stdout.strip("\n")
+        print(f"{status_output}, {self.target_branch_name}")
+        return status_output == self.target_branch_name
 
 
 def main():
     first_task = SwitchBranchTask()
     first_task.setup()
+    first_task.display_command()
 
-    for i in range(100):
-        time.sleep(1)
+    for i in range(0, 100):
+        time.sleep(first_task.waiting_delay)
         check = first_task.check_for_teardown()
-        print(f"Status:{check}, waited {i} seconds")
+        print(f"Status:{check}, waited {i * first_task.waiting_delay} seconds")
         if check:
             exit()
 
