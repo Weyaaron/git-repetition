@@ -1,6 +1,20 @@
 import subprocess
 import time
+from git import Repo
+from random import randrange
+import os
+def init_empty_repo_in_tmp()->Repo:
 
+    base_dir = f"/tmp/git-repetition{randrange(0,100)}/"
+    os.mkdir(base_dir)
+
+    with open(f"{base_dir}test.json", "w") as file:
+        file.write("{}")
+
+    repo = Repo.init(base_dir, bare=True)
+    repo.create_head("main")
+    repo.commit("main")
+    return repo
 
 class Task:
     def setup(self):
@@ -42,16 +56,18 @@ class SwitchBranchTask(Task):
 
 
 def main():
-    first_task = SwitchBranchTask()
-    first_task.setup()
-    first_task.display_command()
-
-    for i in range(0, 100):
-        time.sleep(first_task.waiting_delay)
-        check = first_task.check_for_teardown()
-        print(f"Status:{check}, waited {i * first_task.waiting_delay} seconds")
-        if check:
-            exit()
+    repo = init_empty_repo_in_tmp()
+    print(repo.is_dirty())
+    # first_task = SwitchBranchTask()
+    # first_task.setup()
+    # first_task.display_command()
+    #
+    # for i in range(0, 100):
+    #     time.sleep(first_task.waiting_delay)
+    #     check = first_task.check_for_teardown()
+    #     print(f"Status:{check}, waited {i * first_task.waiting_delay} seconds")
+    #     if check:
+    #         exit()
 
 
 if __name__ == "__main__":
